@@ -5,10 +5,12 @@ from tkinter import ttk
 from tkinter.font import Font
 # Importamos la libreira de PySerial
 import serial
-import xml.etree.ElementTree as ET
 import threading
 import os
 import constantes
+import xml.etree.ElementTree as ET
+from  ConectorPuertoSerie import ConectorPuertoSerie
+
 
 
 #variales generales
@@ -75,53 +77,21 @@ def resize_it(event):
     frameTablaTiempos.configure(width=widthS, height=event.height)
     print("Tamaño de la ventana G:%f  S:%f"%((widthG),(widthS)))    
     ventana.configure(width=event.width, height=event.height)
-    
 
+def añadirLinInputTextoLog(textoMostrar):
+    global inputTextoLog
+    inputTextoLog.config(state='normal')
+    inputTextoLog.insert(END,str(textoMostrar)+"\n")
+    inputTextoLog.see(END)
+    inputTextoLog.config(state='disabled')    
+def reseteoInputTextoLog():
+    inputTextoLog.config(state='normal')
+    inputTextoLog.delete("1.0","end")        
+    inputTextoLog.config(state='disabled')
 
-contenedorTiempos = []
+def procesarTiempo(entradaArduino):
 
-
-class ConectorPuertoSerie(threading.Thread):
-    global  contenedorTiempos  
-    def __init__(self, tk_root):
-        self.root = tk_root
-        threading.Thread.__init__(self)
-        self.start()
-    def __del__(self): 
-        print('Destructor called, Employee deleted.') 
-
-    def run(self):
-        global inputTextoLog
-        #empezamos con la lectura del puerto
-        # Abrimos el puerto del arduino a 9600
-        PuertoSerie = serial.Serial('/dev/ttyUSB0', 9600)
-        loop_active = True
-        reinicioVentana = 0
-        while loop_active:
-            # leemos hasta que encontarmos el final de linea
-            #ventana.update()
-            reinicioVentana +=1 
-            sCadenaPuertoSerie = PuertoSerie.readline()
-            # Mostramos el valor leido y eliminamos el salto de linea del final
-            print("sCadenaPuertoSerie"+str(sCadenaPuertoSerie.decode('utf-8')))
-            textoMostrar = sCadenaPuertoSerie.decode('utf-8').strip()
-            print(textoMostrar)
-                                    
-            if reinicioVentana > 25:
-                reinicioVentana = 0
-                inputTextoLog.config(state='normal')
-                inputTextoLog.delete("1.0","end")        
-                inputTextoLog.config(state='disabled')
-                #botonResetLog()
-
-            inputTextoLog.config(state='normal')
-            inputTextoLog.insert(END,str(textoMostrar)+"\n")
-            inputTextoLog.see(END)
-            inputTextoLog.config(state='disabled')
-            #Pasamos al manejo de los tiempos
-            self.procesarTiempo(textoMostrar)
-
-    def procesarTiempo(self,entradaArduino):
+        añadirLinInputTextoLog(entradaArduino)
         try:
             root = ET.fromstring(entradaArduino)
             print("Procesar tiempo, entrada parseada:",root)
@@ -150,70 +120,78 @@ class ConectorPuertoSerie(threading.Thread):
                         totalTiempo = totalTiempo + time
                         print("Time reicibido",time)
                         if numTiempos == 1:
-                            frameTextoTime1.changeTime(self.formatTime(time))
-                            self.lanzarSonido(tiempo,time,"BEST")
+                            frameTextoTime1.changeTime(formatTime(time))
+                            lanzarSonido(tiempo,time,"BEST")
                         if numTiempos == 2:
-                            frameTextoTime2.changeTime(self.formatTime(time))
-                            self.lanzarSonido(tiempo,time,"GEN")
+                            frameTextoTime2.changeTime(formatTime(time))
+                            lanzarSonido(tiempo,time,"GEN")
                         if numTiempos == 3:
-                            frameTextoTime3.changeTime(self.formatTime(time))
-                            self.lanzarSonido(tiempo,time,"GEN")
+                            frameTextoTime3.changeTime(formatTime(time))
+                            lanzarSonido(tiempo,time,"GEN")
                         if numTiempos == 4:
-                            frameTextoTime4.changeTime(self.formatTime(time))
-                            self.lanzarSonido(tiempo,time,"GEN")
+                            frameTextoTime4.changeTime(formatTime(time))
+                            lanzarSonido(tiempo,time,"GEN")
                         if numTiempos == 5:
-                            frameTextoTime5.changeTime(self.formatTime(time))
-                            self.lanzarSonido(tiempo,time,"GEN")
+                            frameTextoTime5.changeTime(formatTime(time))
+                            lanzarSonido(tiempo,time,"GEN")
                         if numTiempos == 6:
-                            frameTextoTime6.changeTime(self.formatTime(time))
-                            self.lanzarSonido(tiempo,time,"GEN")
+                            frameTextoTime6.changeTime(formatTime(time))
+                            lanzarSonido(tiempo,time,"GEN")
                         if numTiempos == 7:
-                            frameTextoTime7.changeTime(self.formatTime(time))
-                            self.lanzarSonido(tiempo,time,"GEN")
+                            frameTextoTime7.changeTime(formatTime(time))
+                            lanzarSonido(tiempo,time,"GEN")
                         if numTiempos == 8:
-                            frameTextoTime8.changeTime(self.formatTime(time))
-                            self.lanzarSonido(tiempo,time,"GEN")
+                            frameTextoTime8.changeTime(formatTime(time))
+                            lanzarSonido(tiempo,time,"GEN")
                         if numTiempos == 9:
-                            frameTextoTime9.changeTime(self.formatTime(time))
-                            self.lanzarSonido(tiempo,time,"GEN")
+                            frameTextoTime9.changeTime(formatTime(time))
+                            lanzarSonido(tiempo,time,"GEN")
                         if numTiempos == 10:
-                            frameTextoTime10.changeTime(self.formatTime(time))
-                            self.lanzarSonido(tiempo,time,"GEN")
+                            frameTextoTime10.changeTime(formatTime(time))
+                            lanzarSonido(tiempo,time,"GEN")
                         if numTiempos <= 10:
                             tiempoMedioMejor = tiempoMedioMejor + time
                     print("tiempoMedioMejor:",tiempoMedioMejor)
-                    frameTextoTotal.changeTime(self.formatTime(totalTiempo))
+                    frameTextoTotal.changeTime(formatTime(totalTiempo))
                     frameNumLaps.changeTime(len(contenedorTiempos))
-                    frameTextoMinLap.changeTime(self.formatTime(tiempoMin))
+                    frameTextoMinLap.changeTime(formatTime(tiempoMin))
                     print("numTiempos:",numTiempos)   
                     if 0 < numTiempos < 10:
                         print("frameTextoAVGLapG :%f  S:%f"%((tiempoMedioMejor),(numTiempos)))
-                        frameTextoAVGLap.changeTime(self.formatTime(tiempoMedioMejor / numTiempos))
+                        frameTextoAVGLap.changeTime(formatTime(tiempoMedioMejor / numTiempos))
                     elif numTiempos > 10:
                         print("frameTextoAVGLapG :%f  S:%f"%((tiempoMedioMejor),(10)))
-                        frameTextoAVGLap.changeTime(self.formatTime(tiempoMedioMejor / 10))
+                        frameTextoAVGLap.changeTime(formatTime(tiempoMedioMejor / 10))
                     if numTiempos > 0:
                         print("numTiempos>0:")  
-                        frameTextoAVGALLLap.changeTime(self.formatTime(totalTiempo/len(contenedorTiempos)))
-                        frameTextoWorstLap.changeTime(self.formatTime(contenedorTiempos[-1]))
+                        frameTextoAVGALLLap.changeTime(formatTime(totalTiempo/len(contenedorTiempos)))
+                        frameTextoWorstLap.changeTime(formatTime(contenedorTiempos[-1]))
+
+                    if numTiempos % 25 == 0:
+                        reseteoInputTextoLog()
+                
+
         except:
             print("Problema de parseo sale por pantalla")
 
-    def formatTime(self,time):
-        tiempoFormateado =  '{:06.3f}'.format(time)
-        return tiempoFormateado
+def formatTime(time):
+    tiempoFormateado =  '{:06.3f}'.format(time)
+    return tiempoFormateado
 
-    def lanzarSonido(self,tiempo,tiempoAlmacenado,modo):
-        print("lanzarSonido:",tiempo,tiempoAlmacenado)
-        if (float(tiempo) == tiempoAlmacenado):
-            if(modo == "BEST"):
-               os.system('play -nq -t alsa synth {} sine {}'.format(0.1, 640))
-               os.system('play -nq -t alsa synth {} sine {}'.format(0.1, 640))
-               os.system('play -nq -t alsa synth {} sine {}'.format(0.1, 640))
-            if(modo == "GEN"):
-                os.system('play -nq -t alsa synth {} sine {}'.format(0.1, 640))
+def lanzarSonido(tiempo,tiempoAlmacenado,modo):
+    print("lanzarSonido:",tiempo,tiempoAlmacenado)
+    if (float(tiempo) == tiempoAlmacenado):
+        if(modo == "BEST"):
+            os.system('play -nq -t alsa synth {} sine {}'.format(0.1, 640))
+            os.system('play -nq -t alsa synth {} sine {}'.format(0.1, 640))
+            os.system('play -nq -t alsa synth {} sine {}'.format(0.1, 640))
+        if(modo == "GEN"):
+            os.system('play -nq -t alsa synth {} sine {}'.format(0.1, 640))
 
-                    
+
+
+contenedorTiempos = []
+
 
     
 
@@ -354,7 +332,7 @@ ventana.update()
 
  
 # Finalmente bucle de la aplicación
-THLectorPuertoSerie = ConectorPuertoSerie(ventana)
+THLectorPuertoSerie = ConectorPuertoSerie(ventana,procesarTiempo)
 def _delete_window():
     print ("delete_window")
     try:
